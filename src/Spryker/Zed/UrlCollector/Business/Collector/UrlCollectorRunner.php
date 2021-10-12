@@ -5,27 +5,43 @@
  * Use of this software requires acceptance of the Evaluation License Agreement. See LICENSE file.
  */
 
-namespace Spryker\Zed\UrlCollector\Business;
+namespace Spryker\Zed\UrlCollector\Business\Collector;
 
 use Generated\Shared\Transfer\LocaleTransfer;
 use Orm\Zed\Touch\Persistence\SpyTouchQuery;
+use Spryker\Zed\Collector\Business\Collector\DatabaseCollectorInterface;
 use Spryker\Zed\Collector\Business\Exporter\Reader\ReaderInterface;
 use Spryker\Zed\Collector\Business\Exporter\Writer\TouchUpdaterInterface;
 use Spryker\Zed\Collector\Business\Exporter\Writer\WriterInterface;
 use Spryker\Zed\Collector\Business\Model\BatchResultInterface;
-use Spryker\Zed\Kernel\Business\AbstractFacade;
+use Spryker\Zed\UrlCollector\Dependency\Facade\UrlCollectorToCollectorFacadeInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-/**
- * @method \Spryker\Zed\UrlCollector\Business\UrlCollectorBusinessFactory getFactory()
- */
-class UrlCollectorFacade extends AbstractFacade implements UrlCollectorFacadeInterface
+class UrlCollectorRunner implements UrlCollectorRunnerInterface
 {
     /**
-     * {@inheritDoc}
-     *
-     * @api
-     *
+     * @var \Spryker\Zed\Collector\Business\Collector\DatabaseCollectorInterface
+     */
+    protected $collector;
+
+    /**
+     * @var \Spryker\Zed\UrlCollector\Dependency\Facade\UrlCollectorToCollectorFacadeInterface
+     */
+    protected $collectorFacade;
+
+    /**
+     * @param \Spryker\Zed\Collector\Business\Collector\DatabaseCollectorInterface $collector
+     * @param \Spryker\Zed\UrlCollector\Dependency\Facade\UrlCollectorToCollectorFacadeInterface $collectorFacade
+     */
+    public function __construct(
+        DatabaseCollectorInterface $collector,
+        UrlCollectorToCollectorFacadeInterface $collectorFacade
+    ) {
+        $this->collector = $collector;
+        $this->collectorFacade = $collectorFacade;
+    }
+
+    /**
      * @param \Orm\Zed\Touch\Persistence\SpyTouchQuery $baseQuery
      * @param \Generated\Shared\Transfer\LocaleTransfer $localeTransfer
      * @param \Spryker\Zed\Collector\Business\Model\BatchResultInterface $result
@@ -36,7 +52,7 @@ class UrlCollectorFacade extends AbstractFacade implements UrlCollectorFacadeInt
      *
      * @return void
      */
-    public function runStorageUrlCollector(
+    public function run(
         SpyTouchQuery $baseQuery,
         LocaleTransfer $localeTransfer,
         BatchResultInterface $result,
@@ -44,8 +60,9 @@ class UrlCollectorFacade extends AbstractFacade implements UrlCollectorFacadeInt
         WriterInterface $dataWriter,
         TouchUpdaterInterface $touchUpdater,
         OutputInterface $output
-    ) {
-        $this->getFactory()->createStorageUrlCollectorRunner()->run(
+    ): void {
+        $this->collectorFacade->runCollector(
+            $this->collector,
             $baseQuery,
             $localeTransfer,
             $result,
