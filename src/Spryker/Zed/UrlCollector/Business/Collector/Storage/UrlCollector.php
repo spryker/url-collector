@@ -343,9 +343,7 @@ class UrlCollector extends AbstractStoragePropelCollector
         foreach ($touchCollection as $touchEntry) {
             $touchId = $touchEntry[CollectorConfig::COLLECTOR_TOUCH_ID];
             $touchKey = $touchEntry[CollectorConfig::COLLECTOR_STORAGE_KEY];
-            /** @var string $url */
             $url = strstr($touchKey, '/');
-            /** @var string $urlKeyPointer */
             $urlKeyPointer = str_replace($url, $touchId, $touchKey);
             $keysToDelete[$urlKeyPointer] = true;
         }
